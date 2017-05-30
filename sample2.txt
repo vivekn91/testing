@@ -1,0 +1,70 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+var errorCallback = function () {
+    alert("Error Contact admin");
+}
+
+var app = angular.module("vrModeApp", ['ngRoute']);
+
+app.config(function ($routeProvider) {
+    $routeProvider
+            .when("/:projectid", {
+                templateUrl: "partials/publish.html",
+                controller: "publishController"
+            })
+            .otherwise({
+                templateUrl: "partials/notfound.html"
+            });
+});
+
+
+app.controller("publishController", ["$rootScope", "$scope", "$http", "$routeParams", function ($rootScope, $scope, $http, $routeParams) {
+       // $rootScope.globalLoading = false;
+        console.log("IN publishController  :::  ");
+
+        var projectId = $routeParams.projectid;
+        console.log(projectId);
+
+       /* $http({
+            method: "GET",
+            url: "libs/data.json",
+           // url: "action",
+            //params: {action: "getProject", id: projectId}
+        }).then(function (response) {
+            console.log(response);
+        $("#publishDiv").html(response.data.name);
+        //document.querySelector('#trigger').load();
+       var scene = document.querySelector('a-scene');
+       if (scene.hasLoaded) {
+           scene.enterVR();
+       } else {
+           scene.addEventListener('loaded', function () {
+               setTimeout(function () {
+                   scene.enterVR();
+               }, 1000);
+           });
+       };
+        //setTimeout(function(){$("button.a-enter-vr-button").trigger("click");},1000)
+        
+        //$("button.a-enter-vr-button").trigger("click");
+        
+        }, errorCallback);
+        */
+       
+       var scene = window.localStorage.getItem("scene",scene);
+       console.log(scene);
+        $("#publishDiv").html(scene);
+         var scene = document.querySelector('a-scene');
+         if (scene.hasLoaded) {
+           scene.enterVR();
+       } else {
+           scene.addEventListener('loaded', function () {
+               setTimeout(function () {
+                   scene.enterVR();
+               }, 1000);
+           });
+       };
+    }]);

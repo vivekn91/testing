@@ -1,0 +1,228 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+var errorCallback = function () {
+    alert("Error Contact admin");
+    $rootScope.globalLoading = true;
+}
+var app = angular.module("vrApp", ['ngRoute']);
+
+
+app.run(function ($rootScope) {
+    $rootScope.globalLoading = false;
+    window.localStorage.setItem("androidBuild","[]");
+    window.localStorage.setItem("webBuild","[]");
+});
+
+
+app.config(function ($routeProvider) {
+    $routeProvider
+            .when("/", {
+                templateUrl: "partials/editor.html",
+                controller: "editorController"
+            })
+            .when("/package", {
+                templateUrl: "partials/pakage.html",
+                controller: "packageController"
+            })
+            .when("/download", {
+                templateUrl: "partials/download.html",
+                controller: "downloadController"
+            })
+            .when("/organize", {
+                templateUrl: "partials/organize.html",
+                controller: "organizeController"
+            })
+            .otherwise({
+                templateUrl: "partials/notfound.html"
+            });
+});
+
+app.controller("commonController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
+      $scope.selectView = function(event){
+          
+          $("a.sidenav-link").removeClass("active");
+          //console.log(event);
+          $(event.srcElement.parentElement).addClass("active");
+      };  
+}]);
+
+
+app.controller("editorController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
+        $rootScope.globalLoading = true;      
+        $scope.imagesrc = "360images/puydesancy.jpg";
+          $('[data-toggle="tooltip"]').tooltip();  
+        console.log("IN editorController  :::  " + $rootScope.globalLoading);
+        
+          $("a.sidenav-link").removeClass("active");
+         $("#editor").addClass("active");
+
+        $scope.updateImage = function (img) {
+            $scope.imagesrc = img;
+        };
+
+        $scope.openVrMode = function () {
+            $("button.a-enter-vr-button").trigger("click");
+        };
+        
+        $scope.addText = function(){
+             var scene = $('a-scene');
+            var text='<a-text value="Hello World !!" color="#BBB" position="-0.9 0.2 -3" scale="1.5 1.5 1.5"></a-text>';
+            $(scene).append(text);
+            //console.log($(scene).html());
+            //$(scene)[0].enterVR();
+            $(scene)[0].load();
+        };
+        $scope.addImage = function(){
+             var scene = $('a-scene');
+            var image=' <img id="pdx" src="360images/portland.png"><a-image src="#pdx" width="10" height="5" position="-2 1.2 -3" scale="0.2 0.2 0.2"></a-image>';
+            $(scene).append(image);
+            console.log($(scene).html());
+            //$(scene)[0].enterVR();
+            $(scene)[0].load();
+        };
+        $scope.addVideo = function(){
+             var scene = $('a-scene');
+            var image='<a-assets><video id="penguin-sledding" autoplay loop="true" src="video/city-4096-mp4-30fps-x264-ffmpeg.mp4"></video></a-assets><a-video src="#penguin-sledding" width="16" height="9" position="0 0 -20"></a-video>';
+            $(scene).append(image);
+            console.log($(scene).html());
+            //$(scene)[0].enterVR();
+            $(scene)[0].load();
+        };
+        
+        $scope.addBox =  function() {
+           var scene = $('a-scene');
+            var box= ' <a-box color="red" position="0 2 -5" rotation="0 45 45" scale="2 2 2"></a-box>';
+            $(scene).append(box);
+            $(scene)[0].load();
+        };
+        $scope.addCircle =  function() {
+          var scene = $('a-scene');
+            var circle= ' <a-circle color="#CCC" radius="20"></a-circle>';
+             $(scene).append(circle);
+            $(scene)[0].load();
+        };
+        
+        $scope.saveWork = function(){
+             var scene = $('a-scene');
+             window.localStorage.setItem("scene",'<a-scene>'+$(scene).html()+'</a-scene>');
+        };
+        
+        $scope.callOrganize = function(){
+            $scope.saveWork();
+            window.location.hash="#!/organize";
+        };
+        
+        
+    }]);
+
+
+
+app.controller("organizeController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
+        $rootScope.globalLoading = true;
+         $("a.sidenav-link").removeClass("active");
+         $("#organize").addClass("active");
+         
+         console.log("organizeController");
+        
+        $scope.callPackage = function(){
+            window.localStorage.setItem("organize",JSON.stringify($("form").serializeArray()));
+            window.location.hash="#!/package";
+            
+        };
+    }]);
+
+app.controller("packageController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
+        $rootScope.globalLoading = true;
+         $("a.sidenav-link").removeClass("active");
+         $("#package").addClass("active");
+        
+         
+        $scope.switchTab = function(event){
+            console.log(event.srcElement);
+            var show = $(event.srcElement).closest("div.package-menu").data("tab-details");
+            console.log(show);
+            $(".package-menu").removeClass("active");
+            $(event.srcElement).closest("div.package-menu").addClass("active");
+            $(".platform-tab").removeClass("show");
+            $(".platform-tab").addClass("hide");
+            $("#"+show).removeClass("hide");
+            $("#"+show).addClass("show");
+           // $(event.srcElement.parentElement).addClass("active");
+        };
+        
+         $scope.BuildAndriod = function(){
+            window.localStorage.setItem("andriod",JSON.stringify($("form#andriodForm").serializeArray()));
+            var builds = window.localStorage.getItem("androidBuild");
+            builds = JSON.parse(builds);
+            var job={buildNo:(builds.length+1),date: (new Date().toUTCString()),status: "complete"};
+            builds.push(job);
+            window.localStorage.setItem("androidBuild",JSON.stringify(builds));
+             $scope.tableFill();
+        };
+         $scope.BuildWeb = function(){
+           window.localStorage.setItem("web",JSON.stringify($("form#webAppForm").serializeArray()));
+            var builds = window.localStorage.getItem("webBuild");
+            builds = JSON.parse(builds);
+            var job={buildNo:(builds.length+1),date: (new Date().toUTCString()),status: "complete"};
+             builds.push(job);
+            window.localStorage.setItem("webBuild",JSON.stringify(builds));
+             $scope.tableFill();
+        };
+        
+        $scope.tableFill = function(){
+           var builds = window.localStorage.getItem("androidBuild");
+            builds = JSON.parse(builds); 
+            var html="";
+            builds.forEach(function(d){
+                html+="<tr>";
+                html+="<td>" + d.buildNo +"</td>";
+                html+="<td>" + d.date +"</td>";
+                html+="<td>" + d.status +"</td>";
+                html+="</tr>";
+            });
+            $("#androidTable tbody").html(html);
+           var wbuilds = window.localStorage.getItem("webBuild");
+            wbuilds = JSON.parse(wbuilds); 
+            var html="";
+            wbuilds.forEach(function(d){
+                html+="<tr>";
+                html+="<td>" + d.buildNo +"</td>";
+                html+="<td>" + d.date +"</td>";
+                html+="<td>" + d.status +"</td>";
+                html+="</tr>";
+            });
+            $("#webTable tbody").html(html);
+        };
+        
+        $scope.tableFill();
+}]);
+
+app.controller("downloadController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
+         $("a.sidenav-link").removeClass("active");
+         $("#download").addClass("active");
+         
+          $scope.publishApp = function(){
+            console.log("publishApp");
+            window.location.pathname="VRapp/publish.html";
+         };
+         
+         $scope.downloadReady = function () {
+            var projectData = JSON.parse(window.localStorage.getItem("organize"));
+            $("#projectName").text(projectData[0].value);
+            var builds = window.localStorage.getItem("androidBuild");
+            builds = JSON.parse(builds);
+            $("td#andriodLastBuild").text(builds[builds.length - 1].date);
+
+
+            var wbuilds = window.localStorage.getItem("webBuild");
+            wbuilds = JSON.parse(wbuilds);
+            $("td#webLastBuild").text(wbuilds[wbuilds.length - 1].date);
+        };
+      $scope.downloadReady();
+          
+       
+}]);
